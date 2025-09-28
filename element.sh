@@ -7,13 +7,14 @@ if [[ -z $1 ]]; then
   exit 0
 fi
 
-QUERY=""
-if [[ $1 =~ ^[0-9]+$ ]]; then
-  QUERY="SELECT e.atomic_number, e.name, e.symbol, t.type, p.atomic_mass, p.melting_point_celsius, p.boiling_point_celsius FROM elements e JOIN properties p USING(atomic_number) JOIN types t USING(type_id) WHERE e.atomic_number = $1;"
+INPUT="$1"
+if [[ $INPUT =~ ^[0-9]+$ ]]; then
+  CONDITION="e.atomic_number = $INPUT"
 else
-  echo "Element lookup for symbols or names is not implemented yet."
-  exit 0
+  CONDITION="e.symbol ILIKE '$INPUT' OR e.name ILIKE '$INPUT'"
 fi
+
+QUERY="SELECT e.atomic_number, e.name, e.symbol, t.type, p.atomic_mass, p.melting_point_celsius, p.boiling_point_celsius FROM elements e JOIN properties p USING(atomic_number) JOIN types t USING(type_id) WHERE $CONDITION;"
 
 RESULT=$($PSQL "$QUERY")
 
